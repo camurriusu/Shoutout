@@ -1,16 +1,17 @@
-import datetime
 from flask import Flask, render_template, session, redirect, request
 from flask_table import Table, Col, LinkCol, DatetimeCol, ButtonCol
 from werkzeug.security import check_password_hash, generate_password_hash
 from cs50 import SQL
+from dotenv import load_dotenv
+import os
 import time
 from functools import wraps
 
+load_dotenv()
 db = SQL("sqlite:///data.db")
-
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'
-app.secret_key = "\xfb\xade\xfdx\xb4\xdcD\xcd\xe4\xbe\xeaX,\x93\xe1\xd0E\x9d\xc9\xe9\xb2\xd2t"
+app.secret_key = os.environ.get("SECRET_KEY")
 
 class Contacts(Table):
     classes = ["table table-striped"]
