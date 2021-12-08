@@ -1,0 +1,31 @@
+body {
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    background-color: rgb(240, 248, 255);
+}
+
+.table {
+    text-align: left;
+    table-layout: fixed;
+    word-wrap: break-word;
+}
+
+.container, .container-fluid {
+    max-width: 800px;
+}
+
+.form-group, .alert {
+    max-width: 500px;
+}
+
+.navbar-brand {
+    padding-left: 5%;
+    font-weight: 700;
+}
+
+button[type=submit] {
+    transition-duration: 0.4s;
+}
+
+button[type=submit]:hover {
+    background-color: #7c7c7c;
+}

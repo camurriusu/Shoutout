@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block main %}
+<div class="container-fluid">
+    <h3>Register</h3>
+    <form action="/register" method="post">
+        {% if err %}
+        <div class="alert alert-danger alert-dismissible fade show">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <strong>Username exists already.</strong> Maybe you want to <a href="/login" class="alert-link">login</a>?
+        </div>
+        {% endif %}
+        {% if alert %}
+        <div class="alert alert-warning alert-dismissible fade show">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <strong>{{ alert }}</strong>
+        </div>
+        {% endif %}
+        <div class="form-group">
+            <div class="row">
+                <div class="col">
+                    <div class="mb-3 mt-3">
+                        <label for="fname" class="form-label">First Name:</label>
+                        <input type="text" class="form-control" id="fname" placeholder="Enter name" name="fname" required autofocus>
+                        <div class="invalid-feedback">Please fill out this field.</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3 mt-3">
+                        <label for="sname" class="form-label">Surname:</label>
+                        <input type="text" class="form-control" id="sname" placeholder="Enter surname" name="sname" required>
+                        <div class="invalid-feedback">Please fill out this field.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3 mt-3">
+                <label for="age" class="form-label">Birth date:</label>
+                <input type="date" class="form-control" id="age" name="age" min="1900-01-01" max="2008-01-01" required>
+                <div class="invalid-feedback">Please fill out this field.</div>
+            </div>
+            <div class="mb-3 mt-3">
+                <label for="uname" class="form-label">Username:</label>
+                <input type="text" class="form-control" id="uname" placeholder="Enter username" name="uname" required>
+                <div class="invalid-feedback">Please fill out this field.</div>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password:</label>
+                <input type="password" class="form-control" id="password" placeholder="Enter password" name="password" autocomplete="off" required>
+                <div class="invalid-feedback">Please fill out this field.</div>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Retype Password:</label>
+                <input type="password" class="form-control" id="confirmation" placeholder="Enter password again" name="confirmation" autocomplete="off" required>
+                <div class="invalid-feedback">Please fill out this field.</div>
+            </div>
+            <button type="submit" class="btn btn-dark">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                </svg>
+                Register
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

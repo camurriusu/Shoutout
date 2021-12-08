@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Messages
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <h3>Messages:</h3>
+    <form method="post">
+        <div class="form-group">
+            <div class="row">
+                <div class="col">
+                    <select class="form-select" id="select" name="select">
+                        <option>Select a user</option>
+                        {% for user in users %}
+                            <option>{{ user['username'] }}</option>
+                        {% endfor%}
+                    </select>
+                </div>
+                <div class="col">
+                    <button class="btn btn-dark" type="submit">
+                        Go
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+    {{ table }}
+</div>
+{% endblock %}
