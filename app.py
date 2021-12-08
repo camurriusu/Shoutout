@@ -7,6 +7,7 @@ import time
 from functools import wraps
 
 db = SQL("sqlite:///data.db")
+
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'
 app.secret_key = "\xfb\xade\xfdx\xb4\xdcD\xcd\xe4\xbe\xeaX,\x93\xe1\xd0E\x9d\xc9\xe9\xb2\xd2t"
