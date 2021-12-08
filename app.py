@@ -75,10 +75,10 @@ def register():
             return render_template("register.html", err=err)
 
         if len(fname) <= 1:
-            return render_template("register.html", alert="Name must have more than 1 letters.")
+            return render_template("register.html", alert="First name must have more than 1 letters.")
         
-        if len(fname) <= 2:
-            return render_template("register.html", alert="Name must have more than 2 letters.")
+        if len(sname) <= 2:
+            return render_template("register.html", alert="Second name must have more than 2 letters.")
         
         if not pw == request.form.get("confirmation"):
             return render_template("register.html", alert="Passwords do not match.")

@@ -8,13 +8,14 @@ I started this project for my CS50 2021 Final Project, and the purpose of the we
 - ### **`app.py`**
 Below the various imports, the first real code you will see this:
 ```py
+load_dotenv()
 db = SQL("sqlite:///data.db")
-
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'
-app.secret_key = "secret_key here"
+app.secret_key = os.environ.get("SECRET_KEY")
 ```
-For *Shoutout*, I used CS50's library called `SQL`, so that I could easily execute `sqlite3` commands within `data.db`.
+Flask requires a `SECRET_KEY`, so this is where `dotenv` came in handy.\
+I then used CS50's library called `SQL`, so that I could easily execute `sqlite3` commands within `data.db`.
 - #### **Flask Tables**
 ```py
 class Contacts(Table):
@@ -46,7 +47,7 @@ def reqlogin(f):
 This is a slightly altered `@login_required` decorator you can find [here](https://flask.palletsprojects.com/en/2.0.x/patterns/viewdecorators/#login-required-decorator). What this `reqlogin` does, is redirect a user who tries to access a page like `contacts.html` to the `login.html` page, only if they are not yet logged in.
 
 Speaking of logging in...
-- #### **`login()`**
+- #### **`login`**
 ```py
 @app.route('/login', methods=["GET", "POST"])
 def login():
@@ -87,4 +88,23 @@ I also had no need to check whether the user inputted a username or password, as
 Finally, if everything goes well, the user's `id` is stored in `session["user_id"]`. Then he is redirected to `contacts.html`.
 
 But what if the user has to register?
-- #### **`register()`**
+
+---
+- #### **`register`**
+The register function is similar but slightly more complicated than `login`. Like `login`, I use the `err` variable, but now it must also check if the user has properly inputted username and password, following the rules.
+
+A user can only register if:
+
+- `fname` has more than 1 character.
+- `sname` as more than 2 characters.
+- `pw` matches with `request.form.get("confirmation")`.
+- `username` has more than 4 characters.
+- `pw` must have at least:
+  - 8 characters.
+  - a digit.
+  - and a capital letter.
+```py
+if len(pw) < 8 or any(s.isdigit() for s in pw) == False or any(s.isupper() for s in pw) == False:
+    return render_template("register.html", alert="Password must have at least 8 characters, one number, and one capital letter.")
+```
+If any of these rules are not respected when clicking `Register`, they will be met with an alert similar to the one in `login`. The alert's message is passed through `alert` in `render_template()`.
