@@ -137,7 +137,7 @@ def send():
 def messages():
     if request.method == "POST":
         loggedusername = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])
-        users = db.execute("SELECT username FROM users WHERE id IN (SELECT receiver_id FROM messages WHERE sender = ?)", loggedusername[0]['username'])
+        users = db.execute("SELECT username FROM users WHERE id IN (SELECT receiver_id FROM messages WHERE sender = ?) OR (SELECT sender FROM messages WHERE receiver_id = ?)", loggedusername[0]['username'], loggedusername[0]['username'])
         username = request.form.get("select")
         if username == 'Select a user':
             return render_template("/messages.html", table=None, users=users)
