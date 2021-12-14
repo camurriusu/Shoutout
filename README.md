@@ -15,8 +15,8 @@ app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'
 app.secret_key = os.environ.get("SECRET_KEY")
 ```
-Flask requires a `SECRET_KEY`, so this is where `dotenv` came in handy.\
-I then used CS50's library called `SQL`, so that I could easily execute `sqlite3` commands within `data.db`.
+Flask requires a `SECRET_KEY`, which is why I used `dotenv`.\
+I used CS50's library called `SQL`, so that I could easily execute *Sqlite3* commands within `data.db`.
 
 ---
 - #### **Flask Tables**
@@ -57,23 +57,20 @@ Speaking of logging in...
 @app.route('/login', methods=["GET", "POST"])
 def login():
     session.clear()
-    err = False
     if request.method == "POST":
         rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("uname"))
         
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            err = True
-        
-        if err:
-            return render_template("login.html", err=err)
+            return render_template("login.html", err=True)
 
         session["user_id"] = rows[0]["id"]
+        session["username"] = rows[0]["username"]
 
         return redirect("/")
     else:
-        return render_template("login.html", err=err)
+        return render_template("login.html", err=False)
 ```
-This is the code that logs in a user. It is, of course, very similar to what I did in `finance.py` in Week 9. First, `rows` is used to check if the username or password inputted exists. A small difference to my old `finance.py` function is that I added the `err` boolean, and passed it to `login.html` like this:
+This is the code that logs in a user. First, `rows` is used to check if the username or password entered exist. I use the `err` boolean so that it shows the following alert in case of a user's mistake:
 ```html
 {% if err %}
     <div class="alert alert-danger alert-dismissible fade show">
@@ -82,21 +79,20 @@ This is the code that logs in a user. It is, of course, very similar to what I d
     </div>
 {% endif %}
 ```
-so that if the user inputs the wrong username or password they will get the following dismissable alert:
 
 ![Alert](docs/alert.PNG)
 
-I also had no need to check whether the user inputted a username or password, as Bootstrap can do that already:
+I also had no need to check whether the user inputted a username or password, as Bootstrap can do that for me:
 ```html
 <div class="invalid-feedback">Please fill out this field.</div>
 ```
-Finally, if everything goes well, the user's `id` is stored in `session["user_id"]`. Then he is redirected to `contacts.html`.
+Finally, if everything goes well, the user's `id` is stored in `session["user_id"]`, and username in `session["username"]. Then they are redirected to `contacts.html`.
 
-But what if the user has to register?
+But what if a user has to register?
 
 ---
 - #### **`register`**
-The register function is similar but slightly more complicated than `login`. Like `login`, I use the `err` variable, but now it must also check if the user has properly inputted username and password, following the rules.
+The register function is slightly more complicated than `login`. Now it must also check if the user has properly entered username and password, following the requirements below:
 
 A user can only register if:
 
@@ -113,20 +109,20 @@ A user can only register if:
 if len(pw) < 8 or any(s.isdigit() for s in pw) == False or any(s.isupper() for s in pw) == False:
     return render_template("register.html", alert="Password must have at least 8 characters, one number, and one capital letter.")
 ```
-If any of these rules are not respected when clicking `Register`, they will be met with an alert similar to the one in `login`. The alert's message is passed through `alert` in `render_template()`.
+If any of these requirements are not respected, when `Register` is clicked, they will be met with an alert similar to the one in `login`. The alert's message is passed through `alert` in `render_template()`.
 
-If the user is able to register properly, the following code will add them to `data.db`:
+If the user has registered properly, the following code will add their data to `data.db`:
 ```py
 db.execute("INSERT INTO users (fname, sname, bdate, username, hash) VALUES(?, ?, ?, ?, ?)", fname, sname, request.form.get("age"), uname, generate_password_hash(pw))
 ```
-As you can see, the user's first name, surname, birth date, username, and password are stored in `data.db`. Now they can log into the website by clicking 'Login' in the `navbar` and filling out username and password.
+As you can see, the user's first name, surname, birth date, username, and password are stored in `data.db`. Now they can log into the website by clicking 'Login' and filling out username and password.
 
 ![Login Page](docs/login.PNG)
 
 ---
 
 - #### **`contacts`**
-Once the user logs into *Shoutout*, they will first be redirected to `contacts.html`. This is where the user will see the table `Contacts(Table)` listing all users who are registered in *Shoutout*, ordered alphabetically.
+Once the user logs into *Shoutout*, they will first be redirected to `contacts.html`. This is where the user will see the table `Contacts(Table)` which lists all users who are currently registered in *Shoutout*, and the results are ordered alphabetically.
 ```py
 def contacts():
     qry = db.execute("SELECT * FROM users WHERE id != ? ORDER BY fname ASC;", session["user_id"])
@@ -142,11 +138,11 @@ I first run `qry` which returns all users ordered alphabetically that don't have
 </div>
 {% endblock %}
 ```
-You might be wondering what `LinkCol` (in the `Contacts` class) means. It is similar to a `Col` object as it has it's own header ('Send'), but in each row *`send`* is a link to `sendto.html`:
+You might be wondering what `LinkCol` (in the `Contacts` class) means. It is similar to a `Col` object as it has it's own header ('Send'), but in each row `send` is a link to `sendto.html`:
 
 ![LinkCol](docs/sendlink.PNG)
 
-When you click `Send`, you will be redirected to `sendto.html` where you can write a message to the user who shared the same row as the 'Send' you clicked:
+When you click `Send`, you will be redirected to `sendto.html` where you can write a message to the user who shares the same row as the 'Send' you clicked:
 
 ![Send to user](docs/sendto.PNG)
 
@@ -158,7 +154,7 @@ Let's take a look at the last line of `Contacts`:
 ```py
 send = LinkCol('Send', 'sendto', url_kwargs=dict(username='username', id='id'))
 ```
-`LinkCol` takes in a few arguments. `'sendto'` is the 'endpoint'; where the link will take you. `url_kwargs` is needed to take `username` and `id` as arguments. What this means is that it will redirect you to a link that looks like the `@app.route` below.
+`LinkCol` takes in a few arguments. `'sendto'` is the 'endpoint'; where the link will take you. `url_kwargs` is needed to use `username` and `id` as arguments. What this means is that the user will be redirected to a link similar to the `@app.route` below.
 
 Once you click 'Send', you will be sent to (in this case): *`/sendto/jeffh4`*. *`jeffh`* is the username that was passed to `url_kwargs` earlier, and *`4`* is jeffh's `id` that was passed with that username.
 
@@ -168,21 +164,20 @@ Once you write whatever message you like and click the 'Send' button, the follow
 @reqlogin
 def sendto(username, id):
     if request.method == "POST":
-        user = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])
         content = request.form.get("msg")
-        db.execute("INSERT INTO messages (sender, receiver_id, content, date) VALUES(?, ?, ?, ?)", user[0]['username'], id, content, time.time())
+        db.execute("INSERT INTO messages (sender, receiver_id, content, date) VALUES(?, ?, ?, ?)", session["username"], id, content, time.time())
         
         return render_template("/sendto.html", user=username, alert="Message sent!")
     else:
         return render_template("/sendto.html", user=username)
 ```
-Under `if request.method == "POST":` (which becomes true once you press Send), *`user`* is the logged in user's username and *`content`* is be the message that was written and to be sent. To finally send the message, `sender` (logged user's username), `receiver_id` (jeffh's id), `content` (the message), and `time.time()` (current epoch time) are stored in the `messages` table in `data.db`.
+Under `if request.method == "POST":` (which becomes true once you press Send), *`content`* is the message that was written. To finally send the message, `sender`, `receiver_id` (*jeffh*'s id), `content` (the message), and `time.time()` (current epoch time) are stored in the `messages` table in `data.db`.
 
-The reason why I use epoch time instead of a normal date like '2021-12-10 10:32:55' is because it is easier to sort `Messages` (in `messages.html`) by time when using a number. Of course in `messages.html` `time.time()` will be converted back to a readable date.
+The reason why I use epoch time instead of a readable date like '2021-12-10 10:32:55', is because it's easier to sort `Messages` (in `messages.html`) by time when using a number. Of course in `messages.html`, `time.time()` will be converted back to a standard date.
 
 ---
-- #### **`sendto`**
-There is a different yet very similar way to send a message to a user. Instead of finding someone in `contacts.html`, if you know their username already, you could click 'Send' (next to 'Contacts' in the `navbar`). In our case we know Jeff Harold's username to be `jeffh` (it might be useful in an organisation to have everyone's username to be, for example, their first name and then their surname's initial for convenience), so we fill the 'Send to:' field with his username and 'Content:' with our message.
+- #### **`send`**
+There is a different yet very similar way to send a message to a user. Instead of finding someone in `contacts.html`, if one knows the username of the person they need to send a message to already, they could click 'Send' (next to 'Contacts' in the `navbar`). In our case we know Jeff Harold's username to be `jeffh` (it might be useful in an organisation to have everyone's username to follow a rule, like in our case, first name and then surname's initial), so we fill the *'Send to:'* field with his username and *'Content:'* with our message.
 
 ![Send](docs/send.PNG)
 
@@ -191,14 +186,13 @@ There is a different yet very similar way to send a message to a user. Instead o
 Once we click 'Send', this happens:
 ```py
 if request.method == "POST":
-    user = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])
     receiver = db.execute("SELECT id FROM users WHERE username = ?", request.form.get("uname"))
     content = request.form.get("msg")
-    db.execute("INSERT INTO messages (sender, receiver_id, content, date) VALUES(?, ?, ?, ?)", user[0]['username'], receiver[0]['id'], content, time.time())
+    db.execute("INSERT INTO messages (sender, receiver_id, content, date) VALUES(?, ?, ?, ?)", session["username"], receiver[0]['id'], content, time.time())
     
     return render_template("/send.html", alert="Message sent!")
 ```
-As you can see, the code is the same as `sendto()`. You might have noticed the `alert` variable I am passing to `send.html`; it is similar to when we fail a log in attempt in `login.html`:
+As you can see, the code is the same as `sendto()`. You might have noticed that the `alert` variable I am passing to `send.html` is similar to what is used to display an alert if a user fails a log-in attempt in `login.html`:
 
 !["Message sent!" Alert](docs/sentalert.PNG)
 
@@ -209,23 +203,22 @@ This is the last function in `app.py`. If you click 'Messages' in the `navbar`, 
 
 ![No messages](docs/nomessages.PNG)
 
-First, you must select a user from the dropdown menu, the click Go. Afterwards you will be presented with a table that lists all the messages you sent to and received from that user.
+First, you must select a user from the dropdown menu, then click Go. Afterwards, you will be presented with a table that lists all the messages you sent to and received from the user selected.
 
 ![Messages](docs/msg.PNG)
 
-We can see our previous message! If jeffh responds, we will see that too. Of course the table is ordered by time, and the latest message sent or received by a user will come first.
+We can see our previous message! If jeffh responds, we will see that too. Note that the new lines I entered originally in the message are unfortunately ignored here. Of course the table is ordered by time, so that the latest message  will always come first.
 
 ```py
 def messages():
     if request.method == "POST":
-        loggedusername = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])
-        users = db.execute("SELECT username FROM users WHERE id IN (SELECT receiver_id FROM messages WHERE sender = ?) OR (SELECT sender FROM messages WHERE receiver_id = ?)", loggedusername[0]['username'], loggedusername[0]['username'])
+        users = db.execute("SELECT username FROM users WHERE id IN (SELECT receiver_id FROM messages WHERE sender = ?) OR (SELECT sender FROM messages WHERE receiver_id = ?)", session["username"], session["username"])
         username = request.form.get("select")
         if username == 'Select a user':
             return render_template("/messages.html", table=None, users=users)
         
         userid = db.execute("SELECT id FROM users WHERE username = ?", username)
-        qry = db.execute("SELECT * FROM messages WHERE (receiver_id = ? AND sender = ?) OR (receiver_id = ? AND sender = ?) ORDER BY date DESC", userid[0]['id'], loggedusername[0]['username'], session["user_id"], username)
+        qry = db.execute("SELECT * FROM messages WHERE (receiver_id = ? AND sender = ?) OR (receiver_id = ? AND sender = ?) ORDER BY date DESC", userid[0]['id'], session["username"], session["user_id"], username)
         messages = Messages(qry)
         
         return render_template("/messages.html", table=messages, users=users)
@@ -234,8 +227,8 @@ def messages():
         
         return render_template("/messages.html", table=None, users=users)
 ```
-Above is the code that shows us the messages. `loggedusername` gets the logged user's username, while `users` are the people to who we sent a message before (which will appear in the dropdown menu). Then `username` is what we selected from the menu.
-If `username` is it's default value ('Select a user') then the table should return nothing. If instead, we do select someone from the menu, then `userid` will get our `id`, and finally `qry` finds every message that our user received from or sent to whoever we selected in the dropdown menu. Finally, `qry` is passed to `Messages()` to create the table we need, which is shown to us in `messages.html`.
+Above is the code that shows us the messages. `users` are the people who sent or received a message to or from us before (which will appear in the dropdown menu). Then `username` is what we chose from the menu.
+If `username` is it's default value `'Select a user'` then the table should return `None`. If instead we do select someone from the menu, then `userid` will get our `id`, and finally `qry` finds every message that our user received from or sent to whoever we selected in the dropdown menu. Finally, `qry` is passed to `Messages()` to create the table we need, which is shown to us in `messages.html`.
 
 ---
 - ### **`layout.html` and `styles.css`**
@@ -283,3 +276,9 @@ To use Bootstrap icons in links and buttons, I choose what icon to use from [her
 </main>
 ```
 Here is what makes each page different. Buttons, menus, tables, etc. are inside the `<main>` of this layout.
+
+---
+## **This is it!**
+The end of this `README.md` file. This project was made as a Final Project for CS50 2021 (and maybe I will continue working on it).
+
+**This was CS50. Goodbye👋**
