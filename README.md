@@ -1,6 +1,4 @@
 ## **Welcome to Shoutout**
-### ***Video Demo***
-[Quick overview.](https://www.youtube.com/watch?v=QWEmCfNWIKU)
 ### **What is it?**
 I started this project for my CS50 2021 Final Project, and the purpose of the website application I made was to send and receive messages between two users. To be frank, *Shoutout* isn't supposed to replace WhatsApp, Viber, Telegram, and other chat-based applications. *Shout out* is, in fact, not made to be like a chat - it lacks functions such as replying, mentioning, stories, and anything else that defines a social media platform.
 
