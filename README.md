@@ -181,8 +181,6 @@ There is a different yet very similar way to send a message to a user. Instead o
 
 ![Send](docs/send.PNG)
 
-*Ignore the NordPass icon in the 'Send to:' field...*
-
 Once we click 'Send', this happens:
 ```py
 if request.method == "POST":
